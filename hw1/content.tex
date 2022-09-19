@@ -1,0 +1,337 @@
+\section{请给出$T(n)$尽可能紧凑的渐进上界并予以说明，可假定$n$是2的整数次幂}
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=T(2)=1\\
+        T(n) &=T(n-2)+1\quad if\quad n>2
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+\begin{equation}
+    \begin{aligned}
+        T(n) &=T(n-2)+1\\
+             &=1+T(n-4)\\
+             &=1+1+T(n-6)\\
+             &=...\\
+             &=n/2\\
+             & <n\\
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为 $O(n)$    
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=1\\
+        T(n) &=T(n/2)+1\quad if\quad n>1
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+根据主定理
+\begin{equation}
+    \begin{aligned}
+        a=1,b=2,d=0\\
+        d<\log_{b}a
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为 $O(\log n)$
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=1\\
+        T(n) &=T(n/2)+n\quad if\quad n>1
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+根据主定理
+\begin{equation}
+    \begin{aligned}
+        a=1,b=2,d=1\\
+         d > \log_{b}a \\
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为 $O(n)$
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=1\\
+        T(n) &=2T(n/2)+1\quad if\quad n>1
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+根据主定理
+\begin{equation}
+    \begin{aligned}
+        a=2,b=2,d=0\\
+         a \neq 1\\
+         d < \log_{b}a
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为$O(n^{\log_{b}a})=O(n)$
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=1\\
+        T(n) &=4T(n/2)+1\quad if\quad n>1
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+根据主定理
+\begin{equation}
+    \begin{aligned}
+        a=4,b=2,d=0\\
+         a \neq 1\\
+         d < \log_{b}a
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为 $O(n^{\log_{2}4})=O(n^{2})$
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=1\\
+        T(n) &=T(n/2)+ \log n\quad if\quad n>1
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+根据主定理
+\begin{equation}
+    \begin{aligned}
+        a=1,b=2,f(n)=\log n =\Omega(n^{\log_{2}1})=\Omega(n) \\
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为 $O(\log n)$
+
+\subsection{}
+\begin{equation}
+    \begin{aligned}
+        T(1) &=1\\
+        T(n) &=3T(n/2)+ n^{2} \quad if\quad n>1
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+解：
+根据主定理
+\begin{equation}
+    \begin{aligned}
+        a=3,b=2, d=2 > \log_{2}3 \\
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+因此上界为 $O(n^{2})$
+
+\section{寻找中位数问题}
+
+\subsection*{问题分析}
+
+寻找中位数，也就是寻找AB两数组元素中第$(n+m+1)/2$小的数（当$m+n$为奇数）或第$(m+n/2)$ 和 第$(m+n+1)/2$个数（当$m+n$为偶数）。
+不妨设目标数为$k$。有
+\begin{equation}
+    k = \left\{
+    \begin{aligned}
+        \frac{m+n+1}{2} \quad if \quad (m+n)\equiv 1 (mod 2) \\
+        \frac{m+n}{2} and \frac{m+n+1}{2} \quad if \quad (m+n)\equiv 0 (mod 2) \\
+    \end{aligned}
+    \right.
+    \nonumber
+\end{equation}
+
+比较$A[\lfloor k/2 \rfloor]$ 与 $B[\lfloor k/2 \rfloor]$ 
+
+若 $A[\lfloor k/2 \rfloor] \leq B[\lfloor k/2 \rfloor]$ 说明$A[\lfloor k/2 \rfloor]$至多是第$k-1$ 小的元素， 因此$A[\lfloor k/2 \rfloor]$之前的元素不可能是中位数。
+
+同理 若  $A[\lfloor k/2 \rfloor] > B[\lfloor k/2 \rfloor]$ 说明$B[\lfloor k/2 \rfloor]$至多是第$k-1$ 小的元素， 因此$B[\lfloor k/2 \rfloor]$之前的元素不可能是中位数。
+
+下一步只需分析$A[\lfloor k/2 \rfloor + 1...n]$和$B[0...m]$中的第$\lceil k/2 \rceil$小的元素即可。 
+
+\subsection*{算法描述}
+如算法\ref{algo:mid}。
+
+\begin{algorithm}
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$findKthMinElement(A[1..n], B[1..m],k)$}\label{algo:mid}
+    \KwIn{$A[1..n], B[1..m],k$}
+    \KwOut{第$k$小的元素}
+     $p \leftarrow 1$\\
+     $q \leftarrow 1$\\
+    \While(){true}{
+        \If(){$p = n$}{
+            \Return{$B[k-1]$} 
+        }
+        \If(){$q = m$}{
+            \Return{$A[k-1]$}
+        }
+        \If(){$k=1$}{
+            \Return{$min(A[p],B[q])$}
+        }
+
+        $pNext\leftarrow min(p+k/2-1,m)$\\
+        $qNext\leftarrow min(q+k/2-1,n)$\\
+
+        \If(){$A[pNext] \leq B[qNext]$}{
+            $k \leftarrow k-(pNext - p + 1)$\\
+            $p\leftarrow pNext + 1$\\
+        }\Else(){
+            $k \leftarrow k-(qNext - q + 1)$\\
+            $p \leftarrow qNext + 1$\\
+        }
+    }
+    
+\end{algorithm}
+
+\subsection*{时间复杂度分析}
+每次循环至少能将$k$减少一半，因此时间复杂度为$O(\log (m+n))$。
+
+\section{双调序列最大值问题}
+\subsection*{问题分析}
+
+\subsection*{算法描述}
+
+\subsection*{时间复杂度分析}
+
+\section{字符串等价关系判定问题}
+
+\subsection*{问题分析}
+
+字符串等价关系可以将字符串划分成等价类，只需要找出类中的代表元素，判断两个字符串的代表元素是否相等即可。
+
+可以将一个等价类中字典序最小串的作为这个等价类的代表元素。问题转化为寻找与某个字符串等价的字典序最小的字符串。
+
+\subsection*{算法描述}
+
+如算法\ref{algo:findSymbol}
+
+\begin{algorithm}
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$findSymbol(A[1..n], B[1..m],k)$}\label{algo:findSymbol}
+    \KwIn{$S[1..n]$}
+    \KwOut{与$S$等价的字典序最小的串}
+    \If(){$n\equiv 1 (mod 2)$}{
+        \Return{$S[1..n]$}\\
+    }\Else(){
+        $S1 \leftarrow findSymbol(S[1..n/2])$\\
+        $S2 \leftarrow findSymbol(S[n/2+1 .. n])$\\
+        \If(){$S1 < S2$}{
+            \Return{$S1+S2$}
+        }\Else{
+            \Return{$S2+S1$}
+        }
+    }
+\end{algorithm}
+
+\subsection*{时间复杂度分析}
+
+每次递归可以将问题化简成规模为一半的子问题，字符串的比较需要$O(n)$的时间复杂度。
+
+有
+\begin{equation}
+    \begin{aligned}
+        T(n) &=2T(n/2)+O(n)
+    \end{aligned}
+    \nonumber
+\end{equation}
+
+得时间复杂度为$O(n \log n)$。
+
+比较两个代表串是否等需要$O(n)$。
+
+因此最终时间复杂度为$O(n \log n) + O(n) = O(n \log n)$。
+
+
+\section{向量的最小和问题}
+
+\subsection*{问题分析}
+由于每个向量可以取4种状态，因此，寻找两个向量最小和的问题可以转化成寻找两个向量最小差的问题。
+
+考虑所有向量横纵坐标都为正的选择，若$v_{i}, v_{j}$两个向量距离最近，则$v_{i}, -v_{j}$两个向量和最小。
+
+因此只需求出转化后的$n$个向量中距离最近的两个点即可。
+
+将点按照x坐标排序，选择$x=m$作为分割直线，其中，$m$为$x$中各点坐标的中值，分割成$S1,S2$两个集合，可以递归地求解$S1$和$S2$中距离最小的两个点。
+设$S1$和$S2$中最小距离为$d1$和$d2$， 设$d=min(d1,d2)$。
+
+若S中还有距离小于$d$的点对，则必定分别属于$S1$和$S2$，不妨设$p$属于$S1$，$q$属于$S2$，那么$p$和$q$距离$x=m$的距离均小于$d$。
+
+设$P1$为$x=m$左侧距离小于$d$的点集， $P2$为$x=m$右侧距离小于$d$的点集。则 $p \in P1, q \in P2$。
+
+对于任意一个$P1$中的点，可能和这个点构成最小距离点的$P2$中的点只能位于一个 $d * 2d$的矩形中。由于矩形中任意两个点的距离都不小于$d$，
+因此矩形内部最多存在6个点。只需要选择按$y$排序后离$p$最近的6个点比较即可。
+
+
+\subsection*{算法描述}
+
+如算法\ref{algo:findNearest}
+
+\begin{algorithm}
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$findNearest(S[1..n])$}\label{algo:findNearest}
+    \KwIn{$S[m..n]$}
+    \KwOut{S中距离最小的两个点$v_{i}, -v_{j}$的距离}
+    $d \leftarrow \infty$
+    \If(){$n=m$}{
+        \Return{$d$}
+    }
+    \If(){$m+1=n$}{
+        \Return{$distance(S[m], S[n])$}
+    }
+    $mid \leftarrow (m+n)/2 $\\
+    $d1 \leftarrow findNearest(m,mid)$\\
+    $d2 \leftarrow findNearest(mid, n)$\\
+    $d \leftarrow min(d1, d2)$\\
+    $k \leftarrow 1$ 
+    \For(){$i = m up to n$}{
+        \If(){$S[i].x-S[mid].x < d$}{
+            $temp[k] \leftarrow i$\\
+            $k \leftarrow k+1$
+        }
+    }
+    $sort(temp)$\\
+    \For(){$i= 0 up to k$}{
+        \For(){$j=j+1; j<k and S[temp[j]].y - S[temp[i]].y < d; j++$}{
+            $d=min(d, distance(S[temp[i]], S[temp[j]]))$
+        }
+    }
+    \Return{$d$}
+    
+
+\end{algorithm}
+
+
+\subsection*{时间复杂度分析}
+
+若每次分治的同时使用归并排序，则合并的时间复杂度为$O(n)$。
+递归式为$T(n)=2T(n/2) + O(n)$。
+最终时间复杂度$O(n \log n)$。
