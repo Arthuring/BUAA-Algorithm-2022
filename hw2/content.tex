@@ -6,7 +6,7 @@
 
 设小跳蛙跳到第$i$块石头上，最小消耗的体力为$p[i]$。
 
-\subsusbsection{递推关系建立}
+\subsubsection{递推关系建立}
 跳蛙可以从第$i-k$到第$i-1$块石头跳到第$i$块石头，设其从第$j$块石头跳，则相应的体力消耗增加$|h_i - h_j|$
 可知，有如下递推关系 
 \begin{equation}
@@ -32,9 +32,9 @@
     \KwIn{每块石头高度$h[1..n]$，跳蛙最远一次跳过石头数$k$}
     \KwOut{跳到第n块石头花费的最小体力$p[n]$}
     $p[1] \leftarrow 0$\\
-    \For(){ $i$ in $2..n$ }{
+    \For(){ $i \leftarrow 2$ to $n$ }{
        $ p[i] \leftarrow \infty$\\
-       \For($j$ in $\min(i-k,1)..i-1$){
+       \For(){$j\leftarrow \min(i-k,1)$ to $i-1$}{
             $p[i] \leftarrow \min(p[i],p[j] + |h_i-h_j|)$\\
        } 
     }
@@ -44,11 +44,11 @@
 
 \subsection{时间复杂度分析}
 
-从伪代码可知，算法有两层循环，第一层循环复杂度为$O(n)$，第二层循环复杂度为$O(k)$， 因此总算法复杂度为$O(n) * O(k) = O(nk)$
+从伪代码可知，算法有两层循环，第一层循环复杂度为$O(n)$，第二层循环复杂度为$O(k)$， 因此总算法复杂度为$O(n) * O(k) = O(nk)$，可以发现，若当$k>n$时，第二层循环次数仍不大于$n$，因此我们也可以认为该问题的总体时间复杂度为$O(n^2)$。
 
 \section{二进制串变换问题}
 
-\subsection*{问题分析}
+\subsection{问题分析}
 \subsubsection{问题设计}
 由问题描述可知，只有当相邻两位中，$a$和$b$的值都恰好相反，且这两位的值不相等，使用交换操作的代价才会小于直接取反这两位。
 
@@ -57,13 +57,13 @@
 当$a[i]$与$b[i]$相等，则此位无需操作，当$a[i]$与$b[i]$不等，可行的操作有将$a[i]$取反，若当$a[i]$与$b[i]$不等，且$a[i-1]$与$b[i-1]$不等，且$a[i]$与$a[i-1]$不等，可行的操作有交换$a[i]$与$a[i-1]$。
 有递推关系
 \begin{equation}
-    c[i]= 
+    c[i]= \min
     \left \{
-    \begin{align}
+    \begin{aligned}
         &c[i-1] \quad a[i]\text{与}b[i]\text{相等} \\
         &c[i-1]+1 \quad a[i]\text{与}b[i]\text{不相等} \\
         &c[i-2]+1 \quad i>1, a[i]\text{与}b[i]\text{不等},a[i-1]\text{与}b[i-1]\text{不等},a[i]\text{与}a[i-1]\text{不等}\\
-    \end{align}
+    \end{aligned}
     \right .
 \end{equation}
 
@@ -76,7 +76,8 @@
 
 由问题定义可知，目标状态即为$c[n]$。
 
-\subsection*{算法描述}
+\subsection{算法描述}
+
 如算法\ref{algo:binaryChange}。
 
 \begin{algorithm}[H]
@@ -87,7 +88,7 @@
     \KwOut{将串a变成串b的最小操作代价}
     $c[0] \leftarrow 0$\\
 
-    \For(){$i$ in $1..n$}{
+    \For(){$i \leftarrow 1$to$n$}{
         $c[i] \leftarrow \infty$\\
         \If(){$a[i]=b[i]$}{
             $c[i] \leftarrow \min(c[i],c[i-1])$\\
@@ -103,218 +104,224 @@
     
 \end{algorithm}
 
-\subsection*{时间复杂度分析}
+\subsection{时间复杂度分析}
 该算法共有$n$种状态，状态之间的转移复杂度为$O(1)$，因此总复杂度为$O(n)$。
 
-\section{双调序列最大值问题}
-\subsection*{问题分析}
+\section{球队组建问题}
 
-双调序列的最大值一定位于增减区间的转换点，且先增后减，因此，如果可以快速确定增减区间转折点出现的位置区间，则可以快速的解决问题。
+\subsection{问题分析}
 
-采用倍增的方法从左向右搜索数列的由增到减的拐点，会出现以下两种情况
+\subsubsection{问题设计}
 
-\begin{enumerate}
-    \item 数列左端位于增区间内，由于双调函数的性质，若此增区间右侧还有另一个增区间，那么位于另一个增区间的数应均小于左端点所处的增区间的所有数。因此只需要搜索离左端增区间最近的拐点即可。
-    搜索的步骤如下\begin{enumerate}
-        \item 取倍增区间长度初始值为$d = 1$。
-        \item 比较数列中 $A[l + d]$、$A[l + d + 1]$、$A[l + d/2]$ 若满足$A[l + d] < A[l + d + 1] \text{且} A[l + d] > A[l + d/2]$，则说明$A[l..l+d]$仍然位于增区间，还没找到拐点。
-        \item 将d倍增，重复步骤2，直到条件不满足，说明拐点位于$A[l..l+d]$中。
-        \item 递归的搜索$A[l..l+d]$。
-    \end{enumerate}
-    \item 数列左端位于减区间内，则按照情况1的方法，找到下一个增区间，从而将问题转化回情况1，搜索步骤同1中步骤，1.2的判断条件改为$A[l + d] > A[l + d + 1] \text{且} A[l + d] < A[l + d/2]$
-\end{enumerate}
+设$C[i,j]$为在前$j$列中选择第$i$行$j$列球员的情况下的身高最大值。
 
-\subsection*{算法描述}
+\subsubsection{递推关系建立}
 
-如算法\ref{algo:findPeak}。\\
+由问题描述可知，前$j$列中选择第$i$行$j$列球员，只会影响第$j$列和第$j-1$列的选择。
+由问题设计可知，选择了第$i$行第$j$列球员，就无法选择第$3-i$行第$j$列球员，和第$i$行第$j-1$列球员，
+而可以选择第$3-i$行第$j-1$列球员，或不选择第$j-1$列球员，而选择第$3-i$行第$j-2$列球员
+（选择第$i$行$j-2$列球员属于选择$3-i$行第$j-1$列球员的子问题）。
+
+因此有
+
+\begin{equation}
+    C[i,j] = \max
+    \left \{
+        \begin{aligned}
+            C[3-i,j-1] + h[i,j]\\
+            C[3-i,j-2] + h[i,j]
+        \end{aligned}
+     \right .   
+\end{equation}
+
+\subsubsection{自底向上计算（初始化）}
+
+由问题设计易知，$ C[1,0] = 0, C[2,0] = 0, C[1,1] = h[1,1], C[2, 1] = h[2,1] $,
+随后按照列从小到大的顺序计算即可。
+
+\subsubsection{目标状态}
+由题意可知，最终选择的队员的倒数第二列可能有两种状态，一种是都未选择，此时选择最后一列最高球员为最优解，一种是选择了一位球员，此时选择最后一列
+与之不同行的球员为最优解，因此最优解中必定选择了最后一列的球员，因此只需要比较 $C[1,n]$与$C[2,n]$，两者中的最大值即为所求。
+
+\subsection{算法描述}
+
+如算法\ref{algo:choose}
 
 \begin{algorithm}[H]
     \SetKw{Let}{Let}
     \SetKw{Var}{Var}
-    \caption{$findPeak(l, r)$}\label{algo:findPeak}
-    \KwIn{双调序列$A[l..r]$}
-    \KwOut{$A$中最大值}
-    \If(){$l=r-1$}{
-        \Return{$A[l]$}\\
-    }
-    \If(){$A[l] < A[l+1]$}{
-        $d \leftarrow 1$\\
-        \While(){$l+d < r $ and $A[l + d] < A[l + d + 1] $ and $ A[l + d] > A[l + d/2]$}{
-            $d \leftarrow 2d$
+    \caption{$choose(h[1..2,1..n])$}\label{algo:choose}
+    \KwIn{同学身高$h[1..2,1..n]$}
+    \KwOut{身高之和最大的队伍的身高$C$}
+    
+    $C[1,0] \leftarrow 0$\\
+    $C[2,0] \leftarrow 0$\\
+    $C[1,1] \leftarrow h[1,1]$\\
+    $C[2,1] \leftarrow h[2,1]$\\
+
+    \For(){$j \leftarrow 1$ to $n$ }{
+        \For(){$i \leftarrow 1$ to $2$}{
+            $C[i,j] \leftarrow \max(C[3-i,j-1] + h[i,j] , C[3-i,j-2] + h[i,j])$\\
         }
-        \Return{$findPeak(l+d/2, l+d)$}
-    }\Else(){
-        $d \leftarrow 1$\\
-        \While(){$l+d < r $ and $A[l + d] > A[l + d + 1] $ and $ A[l + d] < A[l + d/2]$}{
-            $xd \leftarrow 2d$
-        }
-        \Return{$findPeak(l+d, r)$}
     }
+    \Return{$\max(C[1, n], C[2,n])$}
 \end{algorithm}
 
-\subsection*{时间复杂度分析}
+\subsection{时间复杂度分析}
 
-对于情况1
-每次递归可以将问题规模减小一半，搜索区间采用倍增方法，因此有递推式
+算法一共有$2n$种状态，状态之间的转移时间为$O(1)$，因此总时间复杂度为$O(n)$。
+
+\section{括号匹配问题}
+
+\subsection{问题分析}
+
+\subsubsection{问题设计}
+设$c[i..j]$是第$i$个字符到第$j$个字符中最长合法子序列的长度。
+
+\subsubsection{递推关系建立}
+
+设括号串为$s[1..n]$，
+由题目描述可知，合法的序列有两种，一种是序列的两端的括号匹配，另一种是由匹配的序列拼接而成。
+若$s[i]$与$s[j]$ 匹配，则一种可能的$c[i..j] = c[i+1..j-1] + 2$。
+
+则有递推关系
+
 \begin{equation}
+    c[i,j]= \max
+    \left \{
     \begin{aligned}
-        T(1) &= 1\\
-        T(n) & =T(n/2) + O(\log n)
+        &c[i+1, j-1] + 2 \quad s[i] \text{与} s[j]\text{匹配}\\
+        &c[i,k]+c[k+1,j]\quad  i<k<j\\
     \end{aligned}
-    \nonumber
-\end{equation}
-假设$n$为2的幂次
-\begin{equation}
-    \begin{aligned}
-        T(n) &= T(n/2) + O(\log n)\\
-            &= \log n + \log \frac{n}{2} + \log \frac{n}{4} + ...\\
-            &= \log n * \log n - (\log 1 + \log 2 + \log 4 + ... + \log n)\\
-            &= (\log n) ^ 2 - (0+1+2+3+...+\log n)\\
-            &= (\log n)^2 - \frac{(1+\log n)\log n}{2}\\
-            &= \log^2 n - \frac{1}{2}\log n - \frac{1}{2} \log^2 n\\
-            &= \frac{1}{2} \log^2 n - \frac{1}{2} \log n\\
-            &= O(log^2 n)
-    \end{aligned}
-    \nonumber
+    \right .
 \end{equation}
 
-对于情况2
-需要$O(\log n)$的代价转化成情况1。
+\subsubsection{自底向上计算（初始化）}
+易知，区间长度为1的序列不可能存在匹配的括号子序列，因此所有区间为1的$c[i,i] = 0$。
 
-因此总体时间复杂度为$O(log^2 n) + O(\log n) = O(\log ^2 n)$。
+由递推式可知，$c[i,j]$与所有长度小于其的区间最长子序列长度都有关，因此需要按照区间长度由短到长的顺序计算。
 
-\section{字符串等价关系判定问题}
+\subsubsection{目标状态}
+由题目描述可知,即为$c[1,n]$。
 
-\subsection*{问题分析}
+\subsection{算法描述}
 
-字符串等价关系可以将字符串划分成等价类，只需要找出类中的代表元素，判断两个字符串的代表元素是否相等即可。
-
-可以将一个等价类中字典序最小串的作为这个等价类的代表元素。问题转化为寻找与某个字符串等价的字典序最小的字符串。
-
-\subsection*{算法描述}
-
-如算法\ref{algo:findSymbol}
+如算法\ref{algo:match}
 
 \begin{algorithm}[H]
     \SetKw{Let}{Let}
     \SetKw{Var}{Var}
-    \caption{$findSymbol(A[1..n], B[1..m],k)$}\label{algo:findSymbol}
-    \KwIn{$S[1..n]$}
-    \KwOut{与$S$等价的字典序最小的串}
-    \If(){$n\equiv 1 (mod 2)$}{
-        \Return{$S[1..n]$}\\
-    }\Else(){
-        $S1 \leftarrow findSymbol(S[1..n/2])$\\
-        $S2 \leftarrow findSymbol(S[n/2+1 .. n])$\\
-        \If(){$S1 < S2$}{
-            \Return{$S1+S2$}
-        }\Else{
-            \Return{$S2+S1$}
-        }
-    }
-\end{algorithm}
-
-\subsection*{时间复杂度分析}
-
-每次递归可以将问题化简成规模为一半的子问题，字符串的比较需要$O(n)$的时间复杂度。
-
-有
-\begin{equation}
-    \begin{aligned}
-        T(1) &= 1\\
-        T(n) &=2T(n/2)+O(n)
-    \end{aligned}
-    \nonumber
-\end{equation}
-
-由主定理可得时间复杂度为$O(n \log n)$。
-
-比较两个代表串是否等需要$O(n)$。
-
-因此最终时间复杂度为$O(n \log n) + O(n) = O(n \log n)$。
-
-
-\section{向量的最小和问题}
-
-\subsection*{问题分析}
-由于每个向量可以取4种状态，因此，寻找两个向量最小和的问题可以转化成寻找两个向量最小差的问题。
-
-考虑所有向量横纵坐标都为正的选择，若$v_{i}, v_{j}$两个向量距离最近，则$v_{i}, -v_{j}$两个向量和最小。
-
-因此只需求出转化后的$n$个向量中距离最近的两个点即可。
-
-将点按照x坐标排序，选择$x=m$作为分割直线，其中，$m$为$x$中各点坐标的中值，分割成$S1,S2$两个集合，可以递归地求解$S1$和$S2$中距离最小的两个点。
-设$S1$和$S2$中最小距离为$d1$和$d2$， 设$d=min(d1,d2)$。
-
-若S中还有距离小于$d$的点对，则必定分别属于$S1$和$S2$，不妨设$p$属于$S1$，$q$属于$S2$，那么$p$和$q$距离$x=m$的距离均小于$d$。
-
-设$P1$为$x=m$左侧距离小于$d$的点集， $P2$为$x=m$右侧距离小于$d$的点集。则 $p \in P1, q \in P2$。
-
-对于任意一个$P1$中的点，可能和这个点构成最小距离点的$P2$中的点只能位于一个 $d * 2d$的矩形中。由于矩形中任意两个点的距离都不小于$d$，
-因此矩形内部最多存在6个点。只需要选择按$y$排序后离$p$最近的6个点比较即可。
-
-
-\subsection*{算法描述}
-
-如算法\ref{algo:findNearest}
-
-\begin{algorithm}[H]
-    \SetKw{Let}{Let}
-    \SetKw{Var}{Var}
-    \caption{$findNearest(S[1..n])$}\label{algo:findNearest}
-    \KwIn{$S[m..n]$}
-    \KwOut{S中距离最小的两个点$v_{i}, v_{j}$}
-    $d \leftarrow \infty$\\
-
-    \If(){$m+1=n$}{
-        \Return{$S[m], S[n]$}
-    }
-    $mid \leftarrow (m+n)/2 $\\
-    $t1, t2 \leftarrow findNearest(m,mid)$\\
-    $d1 \leftarrow distance(t1,t2)$\\
-    $t3, t4 \leftarrow findNearest(mid, n)$
-    $d2 \leftarrow distance(t3, t4)$\\
-    \If(){$d1 < d2$}{
-        $v_i, v_j = t1, t2$\\
-    }\Else(){
-        $v_i, v_j = t3, t4$
-    }
-    $d \leftarrow min(d1, d2)$\\
-    $k \leftarrow 1$ \\
-    \For(){$i = m$ up to $n$}{ \emph{//find all point in d * 2d area} \\
-        \If(){$S[i].x-S[mid].x < d$}{
-            $temp[k] \leftarrow i$\\
-            $k \leftarrow k+1$
-        }
+    \caption{$match(s[1..n])$}\label{algo:match}
+    \KwIn{括号串$s[1..n]$}
+    \KwOut{最长合法子序列}
+    
+    \For(){$i \leftarrow 1$ to $n$}{
+        $c[i,i] \leftarrow 0$\\
     }
 
-    $sort(temp)$ \\
-    \emph{//sorted temp by y form small to big} \\
-
-    \For(){$i= 0$ up to $k$}{ \emph{//find the nearest two points}\\
-        \For(){$j=j+1; j<k and S[temp[j]].y - S[temp[i]].y < d; j++$}{
-            \If(){$d < distance(S[temp[i]], S[temp[j]])$}{
-                $v_i, v_j \leftarrow S[temp[i]], S[temp[j]] $
+    \For(){$l \leftarrow 2$ to $n$}{
+        \For(){$i \leftarrow 1$ to $(n-l+1)$}{
+            $c[i,i+l-1]\leftarrow 0$\\
+            \If(){$ s[i] \text{与} s[i+l-1]\text{匹配}$}{
+                $c[i,i+l-1]\leftarrow \max(c[i,i+l-1], c[i+1,i+l-2])$\\
             }
-            $d=min(d, distance(S[temp[i]], S[temp[j]]))$
+            \For(){$k \leftarrow  i+1 $ to $(i+l-2)$}{
+                $c[i,i+l-1]\leftarrow \max(c[i,i+l-1], c[i,k]+c[k+1, i+l-1])$
+            }
         }
     }
-
-    \Return{$v_i, v_j$}
+    \Return{$c[1,n]$}
 \end{algorithm}
 
+\subsection{时间复杂度分析}
 
-\subsection*{时间复杂度分析}
+由算法可知，该算法的状态数有$O(n^2)$种，状态之间的转移复杂度为$O(n)$，因此总时间复杂度为$O(n^3)$。
 
-每次分治可以将问题划分为两个规模为二分之一的子问题，若每次分治的同时使用归并排序，则合并的时间复杂度为$O(n)$。
-递归式为
+\section{箱子问题}
+\subsection{问题分析}
+\subsubsection{问题设计}
+由于箱子可以重复使用，并且必须长宽严格小于下面箱子的箱子才能被使用，因此一个箱子最多被使用3次。因此可以将一个箱子看成3个底面不同的箱子（设$w < d$），此时箱子被规定了摆放方式。
+问题转化成有 $3n$ 个箱子，摆放方式固定，求最大摆放方式。
+将箱子先按照底面面积从大到小排序，再重新编号成$1..3n$。
+
+设$MH[i]$是编号为$i$的箱子作为顶端箱子时，箱子堆的最大高度。
+
+\subsubsection{递推关系建立}
+
+因为只有底面比箱子$i$更大，并且边长满足条件的箱子才能排在第$i$个箱子的下面，有如下递推式
 
 \begin{equation}
-    \begin{aligned}
-        T(2) &= 1\\
-        T(n) & =2T(n/2) + O(n)
-    \end{aligned}
-    \nonumber
+    MH[i] =\max \left \{
+        \begin{aligned}
+            &\max (MH[j] + h[i]) \quad j < i \text{且} box[j].w > box[i].w \text{且} box[j].d > box[i].d \\
+            &h[i]\\
+        \end{aligned}
+    \right .
 \end{equation}
 
-由主定理可得最终时间复杂度$O(n \log n)$。
+\subsubsection{自底向上计算（初始化）}
+
+由问题描述，可知，没有比第一个箱子底面更大的箱子，因此 $MH[1] = box[1].h$，随后按照$i$从小到大的顺序计算即可。
+
+\subsubsection{目标状态}
+
+遍历$MH[1..3n]$，找到$\max(MH[1..3n])$，即为所求。
+
+\subsubsection{路径记录}
+用$Under[i]$表示$MH[i]$取最大时，底下的箱子编号，若底下没有箱子，则为0。设$MH$在$i$处取到最大值，则箱子的顺序从上到下为
+$i, Under[i], Under[Under[i]]...$，直到最下层箱子 $Under[k] = 0$。最后逆序输出，即可得到题目中要求的从最底层到最顶层的箱子规格。
+
+\subsection{算法描述}
+
+如算法\ref{algo:box}。
+
+\begin{algorithm}[htbp]
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$maxBoxHight(a[1..n])$}\label{algo:box}
+    \KwIn{n个箱子的规格数据$a[1..n]$}
+    \KwOut{最高的堆箱子高度$MaxHight$和堆箱子方法$Method$}
+    \For(){$i \leftarrow 1$ to $n$}{ \emph{将$n$个箱子转化成$3n$个箱子} \\
+        $box[3i-2].h \leftarrow a[i].h$\\
+        $box[3i-2].w, box[3i-2].d \leftarrow \min(a[i].w,a[i].d), \max(a[i].w, a[i].d)$\\
+        $box[3i-1].h \leftarrow a[i].w$\\
+        $box[3i-1].w, box[3i-1].d \leftarrow \min(a[i].h,a[i].d), \max(a[i].h, a[i].d)$\\
+        $box[3i].h \leftarrow a[i].d$\\
+        $box[3i].w, box[3i-1].d \leftarrow \min(a[i].h,a[i].w), \max(a[i].h, a[i].w)$\\
+    }
+    $sort(box[1..3n])$ \emph{将$3n$个箱子按照底面积排序} \\
+    
+    $MH[1] \leftarrow box[1].h, Under[1] \leftarrow 0$ \emph{初始化} \\
+    \For(){$i \leftarrow 2$ to $3n$}{ \emph{自底向上计算} \\
+        $MH[i] \leftarrow box[i].h$\\
+        $Under[i] \leftarrow 0$\\
+        \For(){$j \leftarrow 1$ to $i - 1$}{
+            \If(){$box[j].w > box[i].w$ and $box[j].d > box[i].d$}{
+                \If(){$MH[j] + box[i].h > MH[i]$}{
+                    $MH[i] \leftarrow MH[j] + box[i].h$\\
+                    $Under[i] \leftarrow j$\\
+                }
+            }
+        }
+    }
+    $MaxHight \leftarrow 0, index \leftarrow 0$ \emph{找目标状态} \\
+    \For(){$i \leftarrow 1$ to $3n$}{
+        \If(){$MH[i] > MaxHight$}{
+            $MaxHight \leftarrow MH[i]$\\
+            $index \leftarrow i$\\
+        }
+    }
+    $cnt \leftarrow 1$   \emph{方案求解}\\
+    $Method[cnt] \leftarrow box[index]$\\
+    $cnt \leftarrow cnt + 1$\\
+    \While(){$Under[index] != 0$}{
+        $index \leftarrow Under[index]$\\
+        $Method[cnt] \leftarrow box[index]$\\
+        $cnt \leftarrow cnt + 1$\\
+    }
+    \Return{$MaxHight, Method[1..cnt-1]$}
+\end{algorithm}
+
+\subsection{时间复杂度分析}
+转化$3n$个箱子复杂度为$O(n)$，排序箱子复杂度为$O(n \log n)$，状态数共 $3n$，状态转移复杂度为$O(n)$， 寻找目标状态复杂度为$O(n)$，求解输出方案复杂度为$O(n)$，
+因此总时间复杂度为$O(n) + O(n\log n) + O(n) * O(n) + O(n) + O(n) = O(n^2)$。

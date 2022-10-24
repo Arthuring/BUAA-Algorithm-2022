@@ -123,12 +123,19 @@
 根据主定理
 \begin{equation}
     \begin{aligned}
-        a=1,b=2,f(n)=\log n =\Omega(n^{\log_{2}1})=\Omega(n) \\
+        T(n) &= T(n/2) + O(\log n)\\
+            &= \log n + \log \frac{n}{2} + \log \frac{n}{4} + ...\\
+            &= \log n * \log n - (\log 1 + \log 2 + \log 4 + ... + \log n)\\
+            &= (\log n) ^ 2 - (0+1+2+3+...+\log n)\\
+            &= (\log n)^2 - \frac{(1+\log n)\log n}{2}\\
+            &= \log^2 n - \frac{1}{2}\log n - \frac{1}{2} \log^2 n\\
+            &= \frac{1}{2} \log^2 n - \frac{1}{2} \log n\\
+            &= O(\log^2 n)
     \end{aligned}
     \nonumber
 \end{equation}
 
-因此上界为 $O(\log n)$
+因此上界为 $O(\log^2 n)$
 
 \subsection{}
 \begin{equation}
@@ -166,11 +173,13 @@
     \nonumber
 \end{equation}
 
+将问题转化为寻找两个有序数列中第k小的数的问题
+
 比较$A[\lfloor k/2 \rfloor]$ 与 $B[\lfloor k/2 \rfloor]$ 
 
-若 $A[\lfloor k/2 \rfloor] \leq B[\lfloor k/2 \rfloor]$ 说明$A[\lfloor k/2 \rfloor]$至多是第$k-1$ 小的元素， 因此$A[\lfloor k/2 \rfloor]$之前的元素不可能是中位数。
+若 $A[\lfloor k/2 \rfloor] \leq B[\lfloor k/2 \rfloor]$ 说明$A[\lfloor k/2 \rfloor]$至多是第$k-1$ 小的元素， 因此$A[\lfloor k/2 \rfloor]$之前的元素不可能第k小数。
 
-同理 若  $A[\lfloor k/2 \rfloor] > B[\lfloor k/2 \rfloor]$ 说明$B[\lfloor k/2 \rfloor]$至多是第$k-1$ 小的元素， 因此$B[\lfloor k/2 \rfloor]$之前的元素不可能是中位数。
+同理 若  $A[\lfloor k/2 \rfloor] > B[\lfloor k/2 \rfloor]$ 说明$B[\lfloor k/2 \rfloor]$至多是第$k-1$ 小的元素， 因此$B[\lfloor k/2 \rfloor]$之前的元素不可能是第k小数。
 
 下一步只需分析$A[\lfloor k/2 \rfloor + 1...n]$和$B[0...m]$中的第$\lceil k/2 \rceil$小的元素即可。 
 
@@ -280,7 +289,7 @@
             &= (\log n)^2 - \frac{(1+\log n)\log n}{2}\\
             &= \log^2 n - \frac{1}{2}\log n - \frac{1}{2} \log^2 n\\
             &= \frac{1}{2} \log^2 n - \frac{1}{2} \log n\\
-            &= O(log^2 n)
+            &= O(\log^2 n)
     \end{aligned}
     \nonumber
 \end{equation}
@@ -365,7 +374,7 @@
 
 如算法\ref{algo:findNearest}
 
-\begin{algorithm}[H]
+\begin{algorithm}[htbp]
     \SetKw{Let}{Let}
     \SetKw{Var}{Var}
     \caption{$findNearest(S[1..n])$}\label{algo:findNearest}
