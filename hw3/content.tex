@@ -1,0 +1,213 @@
+\section{最长空位问题}
+\subsection{策略描述}
+问题的目标是经过一次交换后，形成的连续0尽量长。显然，交换0，0和交换1，1是没有意义的。由于只能交换一次，
+因此最终得到的连续0的串中原先最多包含一个1。问题可以转化成寻找至多包含一个1的连续0最长子串，并判断是否能通过交换来使1变为0。
+
+可以在$S$两端各添加一个1，寻找两个1之间包含一个1或0个1的最长子串。通过遍历所有1，作为子串中的1的位置，计算第$i-1$ 第 $i+1$ 个 1 之间的长度并保留最大值即可。
+
+需要注意的是，若记$S$中0的个数为$cnt0$，则最长连续0长度不可能大于$cnt0$，因此当上述过程保留最大值时，应只保留小于等于$cnt0$的值。
+ 
+
+\subsection{算法伪代码}
+如算法\ref{algo:longestSpace}。
+
+\begin{algorithm}[H]
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$longestSpace(S[1..n])$}\label{algo:longestSpace}
+    \KwIn{长度为$n$的$01$串$S$}
+    \KwOut{经过一次交换之后$S$中最长连续0的个数}
+    $position1 \leftarrow [1]$\\
+    \For(){$i\leftarrow 1 \quad to \quad n$}{
+        \If(){$S[i] = 1$}{
+            $position1.append(i)$\\
+        }
+    }
+    $position1.append(n+1)$\\
+    $cnt0 \leftarrow n - (position1.size()-2)$ \\
+    $maxAns \leftarrow 0$\\
+    \For(){$i \leftarrow 2 \quad to \quad position1.size()-1$}{
+        \emph{包含1个1}\\
+        \If(){$position1[i+1] - position1[i-1] - 1  \le cnt0$}{
+           $maxAns \leftarrow \max\{position1[i+1] - position1[i-1] - 1 , maxAns\}$\\ 
+        }
+        \emph{包含0个1}\\
+        $maxAns \leftarrow \max{position1[i+1] - position1[i] - 1  ,maxAns}$\\
+        $maxAns \leftarrow \max{position1[i] - position1[i-1] - 1  ,maxAns}$\\
+    }
+    \Return{$maxAns$}
+\end{algorithm}
+
+\subsection{时间复杂度分析}
+
+该算法遍历了串中所有位置从而找出1的位置，时间复杂度为$O(n)$，随后遍历找出的1的位置计算最长包含1个1的子串，时间复杂度为$O(n)$， 
+因此总时间复杂度为$O(n) + O(n) = O(n)$
+% -------------------------------------------------------------
+
+
+% -------------------------------------------------------------
+\section{最大收益问题}
+\subsection{策略描述}
+
+由问题的描述可知，每次升级不会影响之前的升级获得的收益，也就是每次升级都是独立的，因此只需要计算升级后还剩的天数的收益是否能回收成本$U$即可。
+假设当前为第$i$天，若升级带来的将来的产出$(n-i+1)X_2 > U $ 并且目前资金 $C \ge U $ 即进行升级。按照升级策略计算总资金即可。
+
+\subsection{算法伪代码}
+
+如算法\ref{algo:update}。
+
+\begin{algorithm}[H]
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$update(X_1, X_2, U, C, n)$}\label{algo:update}
+    \KwIn{初始产出$X_1$，每次升级多出$X_2$，升级成本$U$，初始资金$C$，总天数$n$}
+    \KwOut{$n$天后最大总资金}
+    
+    \For(){$i \leftarrow 1 \quad to \quad n$}{
+        \If(){$(n-i+1)X_2 > U \quad and \quad C \ge U$}{
+            $X_1 \leftarrow X_1 + X_2$\\
+            $C \leftarrow C - U$\\
+        }
+        $C \leftarrow C + X_1$\\
+    }
+    \Return{$C$}
+\end{algorithm}
+
+\subsection{时间复杂度分析}
+每天的决策仅需要当天的信息即可，需要遍历每一天的情况，因此复杂度为$O(n)$。
+% -------------------------------------------------------------
+
+% -------------------------------------------------------------
+\section{探险家分组问题}
+
+\subsection{策略描述}
+首先将探险家按照经验值从小到大排序，新开一个分组，遍历探险家列表，设当前遍历到的探险家编号为$i$，将$i$加入当前分组，若当前分组人数与$e_i$相等，则将这个分组
+关闭并新开一个分组，之后的探险家将加入新分组。最终所有关闭的分组的数量即为所求。
+
+\subsection{策略证明}
+
+首先，最优策略应满足组中的人数等于组中的最高经验（否则，多余的人有可能构成新的队伍，从本组中移除不产生影响）
+设当前队伍中最大经验为e，则最优策略应该尽量让经验小于e且最靠近e的人在自己的组（否则这些人在别的组可能增大人数需求）。
+假设贪心策略选择的队伍中经验最大为$p_1 \le p_2 \le ...\le p_k$，最优解中选择的队伍中经验最大为$q_1 \le q_2 \le ... \le q_m(m \ge k)$。
+根据贪心策略，应由关系$p_i \le q_i$，否则贪心算法会使得此队中最大经验为$q_i$。因此若$q_i > p_i$，则最优解用$p_i$代替$q_i$，若相等则不变，因此不会使队伍数量减少，
+最终最优解可以转化为贪心解，因此贪心策略成立。
+
+
+\subsection{算法伪代码}
+如算法\ref{algo:group}。
+
+\begin{algorithm}[H]
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$group(e[1..n])$}\label{algo:group}
+    \KwIn{每个探险家的经验值$e[1..n]$}
+    \KwOut{最多分组数目}
+    $groupCnt \leftarrow 0$\\
+    $personCnt \leftarrow 0$\\
+    $Sort(e)$\\
+    \For(){$i \leftarrow 0 \quad to \quad n $}{
+        $personCnt \leftarrow personCnt + 1$\\
+        \If(){$perconCnt = e[i]$}{
+            $groupCnt \leftarrow groupCnt + 1$\\
+            $personCnt \leftarrow 0$\\
+        }
+    }
+    \Return{$groupCnt$}
+    
+\end{algorithm}
+
+\subsection{时间复杂度分析}
+对e中的元素排序的时间复杂度为$O(n\log n)$，遍历数组时间复杂度为$O(n)$，因此总时间复杂度为$O(n \log n) + O(n) = O(n \log n)$。
+
+% -------------------------------------------------------------
+
+% -------------------------------------------------------------
+\section{分店选址问题}
+
+\subsection{策略描述}
+
+设选出的地址的编号的集合为$K$，通过题目描述，
+可以写出总投资成本的表达式为
+
+$sumCost= \max_{i \in K} (cost[i] \frac{\Sigma_{i \in K}flow[i]}{flow[i]}) = \max_{i \in K}(\frac{cost[i]}{flow[i]})\Sigma_{i \in K}flow[i]$
+
+最优化目标为 $\min sumCost$。
+
+不难看出，表达式可以分为两个独立不相干的两部分，并且仅与选取的集合有关。
+为了使得式子的两部分都尽可能小，定义$p[i] = \frac{cost[i]}{flow[i]}$，并将这些地点按照$p[i]$从小到大重新排序，
+假设$\max p[i] = p[j](j \ge k)$，则在这种情况下的最优选择为从$1..j-1$中选择$k-1$个地点使得$Sumflow$最小，
+也就是选择$flow[1..j-1]$中最小的$k-1$个。
+
+因此可以从$p[k]$开始遍历$p[k..n]$，并将前$k-1$个地址的$flow$初始化一个大小为$k-1$的大顶堆，假设当前遍历到$p[j]$，则将$flow[j-1]$加入堆，并将堆顶移出堆，
+计算此时的$SumCost$，维护最小值，即可得到结果。
+
+\subsection{算法伪代码}
+
+如算法\ref{algo:minCost}。
+
+\begin{algorithm}[H]
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$minCost(flow[1..n], cost[1..n], k)$}\label{algo:minCost}
+    \KwIn{$flow[1..n], cost[1..n],k$}
+    \KwOut{最小投资成本}
+    \For(){$i \leftarrow 1 \quad to \quad n$}{
+        $p[i] \leftarrow flow[i] / cost[i]$\\
+    }
+    \emph{按照p对地址进行排序，同时相应的flow 和 cost的顺序也调换}\\
+    $Sort(p)$\\
+    $sumFlow_{k-1} \leftarrow 0$\\
+    $sumCost \leftarrow \infty$
+    \emph{将前k-1个flow建大顶堆}\\
+    \For(){$i \leftarrow 1 \quad to \quad k-1$}{
+        $sumFlow_{k-1} \leftarrow sumFlow_{k-1} + flow[i]$\\
+        $maxTopHeap.insert(flow[i])$\\
+    }
+    \For(){$i \leftarrow k \quad to \quad n$}{
+        \If(){$i \ne k$}{
+            $sumFlow_{k-1} \leftarrow sumFlow_{k-1} + flow[i-1]$\\
+            $maxTopHeap.insert(flow[i-1])$\\
+            \emph{删除堆顶元素并从$sumFlow_{k-1}$中去除}\\
+            $sumFlow_{k-1} \leftarrow sumFlow_{k-1} - maxTopHeap.pop$\\
+        }
+        \emph{计算当前sumCost}\\
+        $sumCost \leftarrow min(sumCost, p[i]*(sumFlow_{k-1} + flow[i]))$\\
+    }
+    \Return{$sumCost$}
+\end{algorithm}
+
+\subsection{时间复杂度分析}
+求$p[i]$需要遍历每个地址，复杂度$O(n)$，按$p[i]$排序复杂度为$O(n \log n)$，遍历$p[k..n]$求$\min sumCost$复杂度为$O(n)$，其中堆的插入和删除复杂度为$O(\log n)$，因此总复杂度为$O(n)+O(n\log n) + O(n) * O(\log n) = O(n \log n)$。
+% -------------------------------------------------------------
+
+
+% -------------------------------------------------------------
+\section{交通建设问题}
+
+\subsection{策略描述}
+本题的核心为最小生成树问题，对于机场，相当于在图中新增一个节点$S$，若选择建立机场，则相当于在图中在城市节点和$s$节点之间添加一条边。
+因此只需要对原图和添加$s$节点后的图计算两次最小生成树，取其中花费少的即可。
+注意到图为稠密图，因此可以选择$Prim$算法求最小生成树。
+\subsection{算法伪代码}
+如算法\ref{algo:traval}。
+
+\begin{algorithm}[H]
+    \SetKw{Let}{Let}
+    \SetKw{Var}{Var}
+    \caption{$traval(c[1..n][1..n], a[1..n])$}\label{algo:traval}
+    \KwIn{两城市之间的道路费用$c[1..n][1..n]$，建设机场的费用$a[1..n]$}
+    \KwOut{使所有城市相互连通的最小费用}
+    $V \leftarrow \{1..n\}$\\
+    $E \leftarrow \{<u,v,w> | u,v \in V, w = c_{u,v}\}$\\
+    $V' \leftarrow V \cup s$\\
+    $E' \leftarrow E \cup \{<u, s, w> | u \in V, w = a_u \}$\\
+    $T \leftarrow Prim(V,E)$\\
+    $T' \leftarrow Prim(V', E')$\\
+    \Return{$\min(T, T')$}
+\end{algorithm}
+
+\subsection{时间复杂度分析}
+需要两次最小生成树计算，图为稠密图，
+采用斐波那契堆的Prim算法计算最小生成树的时间复杂度为$O(E + V \log V)$，在本题中由于任意两个点之间都可以存在边，
+因此$E$的数量与$n^2$同阶， 因此总时间复杂度为$O(n^2 + n \log n) = O(n ^ 2)$。
+% -------------------------------------------------------------
